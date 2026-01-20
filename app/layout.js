@@ -4,6 +4,8 @@ import Navbar from "@/components/Navbar";
 import ClientLayout from "@/components/ClientLayout";
 import Footer from '@/components/Footer';
 
+export const dynamic = 'force-dynamic';
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
