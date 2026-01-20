@@ -1,7 +1,10 @@
 import React, { Suspense } from 'react'
-import dynamic from 'next/dynamic'
+import dynamicImport from 'next/dynamic'
 
-const RegistrationForm = dynamic(() => import('@/components/RegistrationForm'), {
+// Force dynamic rendering for registration page
+export const dynamic = 'force-dynamic';
+
+const RegistrationForm = dynamicImport(() => import('@/components/RegistrationForm'), {
   suspense: true,
 })
 
@@ -16,3 +19,4 @@ const Register = () => {
 }
 
 export default Register
+
