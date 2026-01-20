@@ -1,4 +1,5 @@
 import ServiceCard from "@/components/ServiceCard";
+export const dynamic = 'force-dynamic';
 
 async function getServices() {
   const res = await fetch('/api/services', {
@@ -19,3 +20,4 @@ async function ServicesPage() {
 }
 
 export default ServicesPage;
+
