@@ -2,12 +2,20 @@ import { connectDB } from "@/lib/db";
 import Layout from "@/lib/models/Layout";
 import jwt from "jsonwebtoken";
 
+export const runtime = 'nodejs';
+
 export async function GET(req) {
   try {
+    console.log("Layout GET: Connecting to DB...");
     await connectDB();
+    console.log("Layout GET: DB Connected.");
 
-    const layout = await Layout.findOne();
+    console.log("Layout GET: Querying for data...");
+    const layout = await Layout.findOne().lean();
+    console.log("Layout GET: Query successful.");
+
     if (!layout) {
+      console.log("Layout GET: No data found, returning default.");
       return new Response(JSON.stringify({
         title: '',
         description: ''
@@ -17,6 +25,7 @@ export async function GET(req) {
       });
     }
 
+    console.log("Layout GET: Data found, returning.");
     return new Response(JSON.stringify(layout), {
       status: 200,
       headers: { 'Content-Type': 'application/json' }
@@ -84,7 +93,7 @@ export async function POST(req) {
       });
     }
   } catch (error) {
-    console.error("Layout POST error:", error);
+    console.error("Layout POST error:", error?.stack || error);
     return new Response(JSON.stringify({ error: "Internal server error" }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' }
