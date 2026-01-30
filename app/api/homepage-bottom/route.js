@@ -2,12 +2,20 @@ import { connectDB } from "@/lib/db";
 import HomepageBottom from "@/lib/models/HomepageBottom";
 import jwt from "jsonwebtoken";
 
+export const runtime = 'nodejs';
+
 export async function GET(req) {
   try {
+    console.log("Homepage Bottom GET: Connecting to DB...");
     await connectDB();
+    console.log("Homepage Bottom GET: DB Connected.");
 
-    const homepageBottom = await HomepageBottom.findOne();
+    console.log("Homepage Bottom GET: Querying for data...");
+    const homepageBottom = await HomepageBottom.findOne().lean();
+    console.log("Homepage Bottom GET: Query successful.");
+
     if (!homepageBottom) {
+      console.log("Homepage Bottom GET: No data found, returning default.");
       return new Response(JSON.stringify({
         content: ''
       }), {
@@ -16,6 +24,7 @@ export async function GET(req) {
       });
     }
 
+    console.log("Homepage Bottom GET: Data found, returning.");
     return new Response(JSON.stringify(homepageBottom), {
       status: 200,
       headers: { 'Content-Type': 'application/json' }
@@ -83,7 +92,7 @@ export async function POST(req) {
       });
     }
   } catch (error) {
-    console.error("Homepage Bottom POST error:", error);
+    console.error("Homepage Bottom POST error:", error?.stack || error);
     return new Response(JSON.stringify({ error: "Internal server error" }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' }
