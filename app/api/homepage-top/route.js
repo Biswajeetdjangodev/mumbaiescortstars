@@ -2,12 +2,20 @@ import { connectDB } from "@/lib/db";
 import HomepageTop from "@/lib/models/HomepageTop";
 import jwt from "jsonwebtoken";
 
+export const runtime = 'nodejs';
+
 export async function GET(req) {
   try {
+    console.log("Homepage Top GET: Connecting to DB...");
     await connectDB();
+    console.log("Homepage Top GET: DB Connected.");
 
-    const homepageTop = await HomepageTop.findOne();
+    console.log("Homepage Top GET: Querying for data...");
+    const homepageTop = await HomepageTop.findOne().lean();
+    console.log("Homepage Top GET: Query successful.");
+
     if (!homepageTop) {
+      console.log("Homepage Top GET: No data found, returning default.");
       return new Response(JSON.stringify({
         h1: '',
         seodescription: ''
@@ -17,6 +25,7 @@ export async function GET(req) {
       });
     }
 
+    console.log("Homepage Top GET: Data found, returning.");
     return new Response(JSON.stringify(homepageTop), {
       status: 200,
       headers: { 'Content-Type': 'application/json' }
@@ -70,7 +79,7 @@ export async function POST(req) {
     let requestData;
     try {
       requestData = await req.json();
-      console.log("Request data received:", requestData);
+      console.log("Request data received:", Object.keys(requestData));
     } catch (jsonError) {
       console.log("Failed to parse JSON:", jsonError.message);
       return new Response(JSON.stringify({ error: "Invalid JSON data" }), {
@@ -132,7 +141,7 @@ export async function POST(req) {
       });
     }
   } catch (error) {
-    console.error("Homepage Top POST error:", error);
+    console.error("Homepage Top POST error:", error?.stack || error);
     return new Response(JSON.stringify({ error: "Internal server error" }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' }
