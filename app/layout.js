@@ -3,7 +3,10 @@ import "./globals.css";
 import Navbar from "@/components/Navbar";
 import ClientLayout from "@/components/ClientLayout";
 import Footer from '@/components/Footer';
+import { connectDB } from "@/lib/db";
+import Layout from "@/lib/models/Layout";
 
+// Force dynamic rendering to ensure fresh layout data on every request
 export const dynamic = 'force-dynamic';
 
 const geistSans = Geist({
@@ -19,16 +22,9 @@ const geistMono = Geist_Mono({
 // Fetch layout metadata
 async function fetchLayoutData() {
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/layout`, {
-      cache: 'no-store',
-    });
-
-    if (!response.ok) {
-      console.warn('Failed to fetch layout data:', response.status);
-      return { title: 'Escort App', description: 'Find your perfect companion' };
-    }
-
-    return await response.json();
+    await connectDB();
+    const layout = await Layout.findOne().lean();
+    return layout || { title: 'Escort App', description: 'Find your perfect companion' };
   } catch (error) {
     console.warn('Error fetching layout data:', error);
     return { title: 'Escort App', description: 'Find your perfect companion' };
