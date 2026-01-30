@@ -1,20 +1,17 @@
 import HomeCard from "@/components/HomeCard";
+import { connectDB } from "@/lib/db";
+import HomepageTop from "@/lib/models/HomepageTop";
+import HomepageBottom from "@/lib/models/HomepageBottom";
+import Meta from "@/lib/models/Meta";
 
 // Force dynamic rendering to ensure fresh data on every request
 export const dynamic = 'force-dynamic';
 
 async function fetchHomepageTop() {
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/homepage-top`, {
-      cache: 'no-store',
-    });
-
-    if (!response.ok) {
-      console.warn('Failed to fetch homepage top data:', response.status);
-      return { h1: '', seodescription: '' };
-    }
-
-    return await response.json();
+    await connectDB();
+    const data = await HomepageTop.findOne().lean();
+    return data || { h1: '', seodescription: '' };
   } catch (error) {
     console.warn('Error fetching homepage top data:', error);
     return { h1: '', seodescription: '' };
@@ -23,16 +20,9 @@ async function fetchHomepageTop() {
 
 async function fetchHomepageBottom() {
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/homepage-bottom`, {
-      cache: 'no-store',
-    });
-
-    if (!response.ok) {
-      console.warn('Failed to fetch homepage bottom data:', response.status);
-      return { content: '' };
-    }
-
-    return await response.json();
+    await connectDB();
+    const data = await HomepageBottom.findOne().lean();
+    return data || { content: '' };
   } catch (error) {
     console.warn('Error fetching homepage bottom data:', error);
     return { content: '' };
@@ -41,22 +31,15 @@ async function fetchHomepageBottom() {
 
 async function fetchMetaData() {
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/meta`, {
-      cache: 'no-store',
-    });
-
-    if (!response.ok) {
-      console.warn('Failed to fetch meta data:', response.status);
-      return {
-        seotitle: '',
-        seodescription: '',
-        metaKeywords: [],
-        canonicalUrl: '',
-        robots: 'index, follow'
-      };
-    }
-
-    return await response.json();
+    await connectDB();
+    const data = await Meta.findOne().lean();
+    return data || {
+      seotitle: '',
+      seodescription: '',
+      metaKeywords: [],
+      canonicalUrl: '',
+      robots: 'index, follow'
+    };
   } catch (error) {
     console.warn('Error fetching meta data:', error);
     return {
