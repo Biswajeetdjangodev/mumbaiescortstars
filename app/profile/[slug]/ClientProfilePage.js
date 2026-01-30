@@ -86,7 +86,7 @@ export default function ClientProfilePage({ profile }) {
                   priority={true}
                 />
                 <div className="absolute top-2 md:top-4 left-2 md:left-4">
-                  <span className="bg-green-500 text-[10px] md:text-xs px-2 py-1 rounded-full">ONLINE</span>
+                  <span className="bg-green-500 text-[10px] md:text-xs px-2 py-1 rounded-full">{profile?.availability || 'ONLINE'}</span>
                 </div>
                 <div className="absolute bottom-2 md:bottom-4 right-2 md:right-4 flex gap-2">
                   <button className="bg-black/50 p-1.5 md:p-2 rounded-full hover:bg-black/70 transition-colors">
@@ -125,7 +125,7 @@ export default function ClientProfilePage({ profile }) {
               <div className="space-y-2 mb-6 lg:mb-0">
                 <p className="text-xs text-gray-400 uppercase tracking-wide">QUICK ACTIONS</p>
                 <div className="grid grid-cols-2 lg:grid-cols-1 gap-2">
-                  <a href={`mailto:${profile.createdBy?.email || ''}`} className="w-full">
+                  <a href={`mailto:${(profile.agencyName && profile.agencyName.includes('@')) ? profile.agencyName : (profile.createdBy?.email || '')}`} className="w-full">
                     <button className="w-full bg-purple-600 hover:bg-purple-700 py-2.5 md:py-3 rounded-lg flex items-center justify-center gap-2 text-sm md:text-base transition-colors">
                       <Suspense fallback={<div className="w-4 h-4" />}>
                         <MessageCircle className="w-4 h-4" />
@@ -159,7 +159,10 @@ export default function ClientProfilePage({ profile }) {
                   <div className="text-xs md:text-sm text-gray-400">per hour</div>
                 </div>
               </div>
-              <p className="text-sm md:text-base text-gray-300 mb-1">{profile?.nationality || 'Not specified'}</p>
+              <p className="text-sm md:text-base text-gray-300 mb-1">
+                {profile?.nationality || 'Not specified'}
+                {profile?.location && ` • ${profile.location}`}
+              </p>
               <div className="flex flex-wrap items-center gap-3 md:gap-4 text-xs md:text-sm text-gray-400">
                 <span className="flex items-center gap-1">
                   <Suspense fallback={<div className="w-3 h-3 md:w-4 md:h-4" />}>
@@ -175,7 +178,7 @@ export default function ClientProfilePage({ profile }) {
             {/* Tabs - Horizontal Scroll on Mobile */}
             <div className="border-b border-gray-700 mb-4 md:mb-6 overflow-x-auto">
               <nav className="flex space-x-4 md:space-x-8 min-w-max md:min-w-0">
-                {['about', 'services', 'outcall', 'info'].map((tab) => (
+                {['about', 'services',  'info'].map((tab) => (
                   <button
                     key={tab}
                     onClick={() => setActiveTab(tab)}
@@ -208,24 +211,19 @@ export default function ClientProfilePage({ profile }) {
                   <h3 className="text-base md:text-lg font-semibold mb-2 md:mb-3">Services & Rates</h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 md:gap-4">
                     {profile.services?.map((service, index) => {
-                      const iconMap = {
-                        MapPin: MapPin,
-                        Home: Home,
-                        Clock: Clock,
-                        Calendar: Calendar,
-                        Plane: Plane,
-                        Utensils: Utensils
-                      };
-                      const IconComponent = iconMap[service.icon] || Clock;
+                      const isString = typeof service === 'string';
+                      const name = isString ? service : service.name;
+                      const price = isString ? '' : service.price;
+
                       return (
                         <div key={index} className="bg-gray-800 p-3 md:p-4 rounded-lg flex justify-between items-center">
                           <div className="flex items-center gap-2 md:gap-3">
-                            <Suspense fallback={<div className="w-4 h-4 md:w-5 md:h-5" />}>
+                            {/* <Suspense fallback={<div className="w-4 h-4 md:w-5 md:h-5" />}>
                               <IconComponent className="w-4 h-4 md:w-5 md:h-5 text-pink-500 shrink-0" />
-                            </Suspense>
-                            <span className="text-sm md:text-base">{service.name}</span>
+                            </Suspense> */}
+                            <span className="text-sm md:text-base capitalize">{name}</span>
                           </div>
-                          <span className="font-semibold text-pink-500 text-sm md:text-base whitespace-nowrap ml-2">{service.price}</span>
+                          {price && <span className="font-semibold text-pink-500 text-sm md:text-base whitespace-nowrap ml-2">{price}</span>}
                         </div>
                       );
                     })}
@@ -233,11 +231,11 @@ export default function ClientProfilePage({ profile }) {
                 </div>
               )}
 
-              {activeTab === 'outcall' && (
+              {/* {activeTab === 'outcall' && (
                 <div>
                   <h3 className="text-base md:text-lg font-semibold mb-2 md:mb-3">Outcall Information</h3>
                   <div className="bg-gray-800 p-3 md:p-4 rounded-lg">
-                    <p className="text-sm md:text-base text-gray-300 mb-3 md:mb-4">Available for outcall services in the local area. Travel fees may apply for distances over 15 miles.</p>
+                    <p className="text-sm md:text-base text-gray-300 mb-3 md:mb-4">Available for outcall services in {profile.location || 'the local area'}. Travel fees may apply for distances over 15 miles.</p>
                     <div className="space-y-2 text-sm md:text-base">
                       <div className="flex justify-between">
                         <span>Minimum booking:</span>
@@ -254,13 +252,13 @@ export default function ClientProfilePage({ profile }) {
                     </div>
                   </div>
                 </div>
-              )}
+              )} */}
 
               {activeTab === 'info' && (
                 <div>
                   <h3 className="text-base md:text-lg font-semibold mb-2 md:mb-3">Physical Stats</h3>
                   <div className="grid grid-cols-2 gap-2 md:gap-4">
-                    {Object.entries(profile.stats || {}).map(([key, value]) => (
+                    {Object.entries(profile.stats || {}).filter(([_, value]) => value).map(([key, value]) => (
                       <div key={key} className="bg-gray-800 p-2.5 md:p-3 rounded-lg">
                         <div className="text-[10px] md:text-xs text-gray-400 uppercase tracking-wide mb-1">
                           {key}
@@ -277,7 +275,7 @@ export default function ClientProfilePage({ profile }) {
             <div className="mt-6 md:mt-8 bg-linear-to-r from-purple-600 to-pink-600 p-4 md:p-6 rounded-lg">
               <h3 className="text-base md:text-lg font-semibold mb-3 md:mb-4">Ready to Book?</h3>
               <div className="flex flex-col sm:flex-row gap-2 md:gap-4">
-                <a href={`mailto:${profile.createdBy?.email || ''}`} className="flex-1">
+                <a href={`mailto:${(profile.agencyName && profile.agencyName.includes('@')) ? profile.agencyName : (profile.createdBy?.email || '')}`} className="flex-1">
                   <button className="w-full bg-white text-purple-600 font-semibold py-2.5 md:py-3 px-4 md:px-6 rounded-lg hover:bg-gray-100 transition-colors text-sm md:text-base">
                     Send Message
                   </button>
