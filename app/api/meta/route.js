@@ -2,12 +2,20 @@ import { connectDB } from "@/lib/db";
 import Meta from "@/lib/models/Meta";
 import jwt from "jsonwebtoken";
 
+export const runtime = 'nodejs';
+
 export async function GET(req) {
   try {
+    console.log("Meta GET: Connecting to DB...");
     await connectDB();
+    console.log("Meta GET: DB Connected.");
 
-    const meta = await Meta.findOne();
+    console.log("Meta GET: Querying for data...");
+    const meta = await Meta.findOne().lean();
+    console.log("Meta GET: Query successful.");
+
     if (!meta) {
+      console.log("Meta GET: No data found, returning default.");
       return new Response(JSON.stringify({
         seotitle: '',
         seodescription: '',
@@ -20,6 +28,7 @@ export async function GET(req) {
       });
     }
 
+    console.log("Meta GET: Data found, returning.");
     return new Response(JSON.stringify(meta), {
       status: 200,
       headers: { 'Content-Type': 'application/json' }
@@ -93,7 +102,7 @@ export async function POST(req) {
       });
     }
   } catch (error) {
-    console.error("Meta POST error:", error);
+    console.error("Meta POST error:", error?.stack || error);
     return new Response(JSON.stringify({ error: "Internal server error" }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' }
