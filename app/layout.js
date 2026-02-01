@@ -35,7 +35,7 @@ export async function generateMetadata() {
   const layoutData = await fetchLayoutData();
 
   return {
-    title: layoutData.title || 'Escort App',
+    title: (layoutData.title ? layoutData.title.charAt(0).toUpperCase() + layoutData.title.slice(1) : 'Escort App'),
     description: layoutData.description || 'Find your perfect companion',
   };
 }
