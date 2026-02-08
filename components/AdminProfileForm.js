@@ -3,7 +3,6 @@ import { useState, useEffect } from 'react';
 import ImageUpload from './ImageUpload';
 import { useDispatch } from 'react-redux';
 import { invalidateProfilesCache } from '../lib/slices/profileSlice';
-import { slugify } from '../lib/utils';
 
 
 export default function AdminProfileForm({ onProfileAdded, initialData }) {
@@ -12,6 +11,7 @@ const [serviceInput, setServiceInput] = useState('');
   const dispatch = useDispatch();
   const [form, setForm] = useState({
     name: '',
+    slug: '',
     nationality: '',
     age: '',
     price: '',
@@ -55,6 +55,7 @@ const [serviceInput, setServiceInput] = useState('');
     if (initialData) {
       setForm({
         name: initialData.name || '',
+        slug: initialData.slug || '',
         nationality: initialData.nationality || '',
         age: initialData.age || '',
         price: initialData.price || '',
@@ -144,8 +145,12 @@ const [serviceInput, setServiceInput] = useState('');
       const isEditing = !!initialData;
       const method = isEditing ? 'PUT' : 'POST';
 
-      // Generate slug if not present (for new profiles) or preserve existing one
-      const slug = initialData?.slug || slugify(form.name);
+      // Use the manually entered slug
+      const slug = form.slug;
+      if (!slug.trim()) {
+        alert('Slug is required');
+        return;
+      }
       const requestBody = isEditing ? { ...form, id: initialData._id, slug } : { ...form, slug };
 
       const response = await fetch('/api/services', {
@@ -169,6 +174,7 @@ const [serviceInput, setServiceInput] = useState('');
         if (!isEditing) {
           setForm({
             name: '',
+            slug: '',
             nationality: '',
             age: '',
             price: '',
@@ -236,6 +242,15 @@ const [serviceInput, setServiceInput] = useState('');
               name="name"
               placeholder="Full Name *"
               value={form.name}
+              onChange={handleChange}
+              className="p-3 bg-black/30 border border-purple-500/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all duration-200"
+              required
+            />
+            <input
+              type="text"
+              name="slug"
+              placeholder="Slug (URL identifier) *"
+              value={form.slug}
               onChange={handleChange}
               className="p-3 bg-black/30 border border-purple-500/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all duration-200"
               required
