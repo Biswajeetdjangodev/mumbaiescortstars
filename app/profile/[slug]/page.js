@@ -1,11 +1,24 @@
 import { connectDB } from "@/lib/db";
 import Service from "@/lib/models/Service";
 import ClientProfilePage from './ClientProfilePage';
+import { Metadata } from 'next';
+
+export async function generateMetadata({ params }) {
+  const { slug } = await params;
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://yourdomain.com';
+  const canonicalUrl = `${baseUrl}/profile/${slug}`;
+
+  return {
+    alternates: {
+      canonical: canonicalUrl,
+    },
+  };
+}
 
 async function getProfileData(slug) {
   try {
     await connectDB();
-    
+
     // Query the Service model directly instead of calling an API
     const profile = await Service.findOne({ slug: slug }).lean();
 
